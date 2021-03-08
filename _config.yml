@@ -2,7 +2,7 @@
 #  User configuration
 # -----------------------------------------------------------------------------
 
-title:               개발자 규형 키우기
+title:               개발자 규형키우기
 
 # The unique resource location of your page.
 # Set to `https://<username>.github.io` when hosting on GitHub Pages
@@ -54,7 +54,7 @@ disqus_shortname:    xxxx
 copyright:           '&copy; 2021. by Dev-Gyu'
 
 # Format of the permalinks
-permalink:           
+permalink:
 
 # Pagination configuration (used by the `blog` layout)
 paginate:            3
@@ -139,5 +139,3 @@ tipue_search:
          files: [search.html, index.html, tags.html]
          categories: []
          tags: []
-
-
