@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: http://dev-gyus.github.io/sitemap.xml
