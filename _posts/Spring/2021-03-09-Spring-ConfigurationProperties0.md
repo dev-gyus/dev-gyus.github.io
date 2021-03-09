@@ -18,11 +18,11 @@ Spring Security에선 이 정보를 SecurityContextHolder내부의 SecurityConte
 ***
 
 >* 컨트롤러에서 Principal 객체를 주입받아 사용
-* 컨트롤러에서 @AuthenticationPrincipal 선언하여 엔티티 객체 받아오기
-* 컨트롤러에서 @AuthenticationPrincipal 선언하여 엔티티의 어댑터 객체 받아오기(가장 권장)
+>* 컨트롤러에서 @AuthenticationPrincipal 선언하여 엔티티 객체 받아오기
+>* 컨트롤러에서 @AuthenticationPrincipal 선언하여 엔티티의 어댑터 객체 받아오기(가장 권장)
 
 1. 컨트롤러에서 Principal 객체 주입받아 사용
-![Principal](../../assets/img/spring/spring-security/AuthenticationPrincipal/principal.png)
+![Principal](/assets/img/spring/spring-security/AuthenticationPrincipal/principal.png)
 
 가장 간단하게 사용할 수 있는 방법이지만, 이는 <strong>Spring Security가 제공하는 객체가 아닌</strong>, 자바에 정의되어있는 Principal 객체를 바인딩 해주는 것이라 사용할 수 있는 메소드가 getName()밖에 없다.
 
