@@ -1,11 +1,17 @@
 ---
 layout: post
+
 title:  "[Spring-Security] @AuthenticationPrincipal에 대하여"
 subtitle:   "UserDetailsService에서 반환된 User객체 바인딩"
 date:   2021-03-09
+title: '[Spring-Security] @AuthenticationPrincipal에 대하여'
+subtitle: UserDetailsService에서 반환된 User객체 바인딩
+date: {}
+
 categories: Spring
 tags: Spring-Security
 comments: true
+published: true
 ---
 
 # @AuthenticationPrincipal
@@ -52,6 +58,7 @@ Spring Security에선 이 정보를 SecurityContextHolder내부의 SecurityConte
 >@AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : account")
 
 이를 이용해 커스텀 애노테이션을 생성하여 지정해둔다면, 굉장히 반복적인 로그인 회원과 관련된 정보를 손쉽게 얻을 수 있다.
+
 ***
 회원제 서비스에서 현재 로그인한 회원에 대한 정보를 조회해오는건 굉장히 잦고 반복적인 작업이다. 하지만 이 애노테이션을 이용해 커스텀 애노테이션을 만들어 사용한다면, 매우 손쉽게 로그인 정보를 가져올수 있으므로, 효율적인 측면에서 상당한 이점이 있다 생각한다.  
 <strong>결론은 까먹지말자.</strong>
