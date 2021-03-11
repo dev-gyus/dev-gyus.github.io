@@ -2,7 +2,7 @@
 layout: post
 title:  "[Java] @Retention, @Target에 대하여"
 subtitle:   "@Retention, @Target애노테이션 분석"
-date: 2021-03-08
+date: 2021-03-11
 categories: Java
 tags: false
 comments: true
@@ -30,3 +30,38 @@ RetentionPolicy에는 3가지 정책이 있으며, 각각의 설명은 다음과
 실제 커스텀애노테이션을 만들어 사용하는건 결국 어플리케이션의 실행동안 개발자가 특정 목적을 가지고 사용하기위해 만드는것이므로, RUNTIME을 가장 많이 사용하고, 거의 이것만 사용한다고 생각해도 될것같다.
 ## @Target
 ***
+커스텀 애노테이션이 적용될 대상을 지정하는 애노테이션으로 선언할 수 있는 enum값은 아래와 같다.
+
+    클래스, 인터페이스에 선언
+    TYPE,
+
+    enum, 상수 포함 객체 필드에 선언
+    FIELD,
+
+    메소드에 선언
+    METHOD,
+
+    일반적인 파라미터에 선언
+    PARAMETER,
+
+    생성자에 선언
+    CONSTRUCTOR,
+
+    지역변수에 선언
+    LOCAL_VARIABLE,
+
+    애노테이션에 선언
+    ANNOTATION_TYPE,
+
+    패키지에 선언
+    PACKAGE,
+
+    매개변수의 타입에 선언
+    TYPE_PARAMETER,
+
+    매개변수 사용시 선언
+    TYPE_USE  
+
+나는 @Target의 속성으론 보편적인 파라미터에 다 붙일수 있는 PARAMETER를 많이 사용했던것같다.  
+(SpringSecurity의 Authentication 바인딩해올때 아주 편하다.)  
+역시 잊지말고 필히 기억해두자.
