@@ -6,7 +6,6 @@ subtitle:   "UserDetailsService에서 반환된 User객체 바인딩"
 date:   2021-03-09
 title: '[Spring-Security] @AuthenticationPrincipal에 대하여'
 subtitle: UserDetailsService에서 반환된 User객체 바인딩
-date: {}
 
 categories: Spring
 tags: Spring-Security
