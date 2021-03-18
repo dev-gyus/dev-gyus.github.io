@@ -1,11 +1,12 @@
 ---
 layout: post
-title:  "[Spring-Security] 계정 정지 기능 구현 - 2"
-subtitle:   "특정 사용자 계정 정지 및 실시간 계정 로그아웃 기능 구현"
-date: 2021-03-18
+title: '[Spring-Security] 계정 정지 기능 구현 - 2'
+subtitle: 특정 사용자 계정 정지 및 실시간 계정 로그아웃 기능 구현
+date: {}
 categories: Spring
 tags: Spring-Security
 comments: true
+published: true
 ---
 
 # 계정잠금기능 설정하기 - 2
@@ -28,6 +29,7 @@ comments: true
 
 <pre>
 <code>
+```
 @Configuration  
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -49,15 +51,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     return new ServletListenerRegistrationBean<HttpSessionEventPublisher>(new HttpSessionEventPublisher());
   }
 }
+```
 </code>
 </pre>
 
 이제 준비는 다 됐고, 유저를 정지시키는 클래스에 정지기능을 가진 메소드를 구현하면된다.  
-Spring Security, Spring Data JPA를 사용하였다  
-
+Spring Security, Spring Data JPA를 사용하였다
 
 <pre>
 <code>
+```
 @Service
 @RequireArgsConstructor
 @Transactional
@@ -84,6 +87,7 @@ public void blockUser(Long memberId){
   }
 }
 }
+```
 </code>
 </pre>
 
