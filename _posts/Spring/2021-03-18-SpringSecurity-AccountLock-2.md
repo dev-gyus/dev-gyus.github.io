@@ -24,10 +24,11 @@ comments: true
 >5. 반환받은 객체는 SessionInfomation이란 객체의 컬렉션인데, 이 역시 루프를 돌려서 정지시킬 계정의 특정 unique값과 대조하여 해당하는 세션을 만료시켜 로그아웃 시키는 기능을 이용함.
 
 우선, SessionRegistry를 우리가 주입받아 사용할 수 있도록 Security설정파일에 SessionRegistry 빈을 등록한뒤, SessionManagement에 해당 빈을 등록시키고, 세션이 만료되었을경우 스프링 시큐리티가 이를 감지하도록 이벤트 리스너도
-빈으로 등록해둔다.
+
 
 <pre>
-<code>@Configuration  
+<code>
+@Configuration  
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
   ... 생략
@@ -52,9 +53,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 </pre>
 
 이제 준비는 다 됐고, 유저를 정지시키는 클래스에 정지기능을 가진 메소드를 구현하면된다.  
-Spring Security, Spring Data JPA를 사용하였다
+Spring Security, Spring Data JPA를 사용하였다  
+
+
 <pre>
-<code>@Service
+<code>
+@Service
 @RequireArgsConstructor
 @Transactional
 public class BlockUserService{
@@ -81,7 +85,10 @@ public void blockUser(Long memberId){
 }
 }
 </code>
-</pre>  
+</pre>
+
+
+
 
 이렇게 해두고, 정지관련된 리소스에는 관리자권한을 가진 유저만 접근할 수 있도록 설정한뒤, 정지 요청시 대응하는 컨트롤러에서
 blockUser 메소드를 호출하도록 프로그래밍 해두면, 정지된 유저는 다음요청에 로그아웃 처리되어 인증을 필요로 하는 리소스에 접근할때 Security설정에 의해 Login Url로 이동하지만, 이미 정지처리가 되어있기 때문에 로그인해도 LockedException 발생으로 로그인이 되지않는다.  
