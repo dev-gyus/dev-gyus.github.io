@@ -24,8 +24,7 @@ comments: true
 >5. 반환받은 객체는 SessionInfomation이란 객체의 컬렉션인데, 이 역시 루프를 돌려서 정지시킬 계정의 특정 unique값과 대조하여 해당하는 세션을 만료시켜 로그아웃 시키는 기능을 이용함.
 
 우선, SessionRegistry를 우리가 주입받아 사용할 수 있도록 Security설정파일에 SessionRegistry 빈을 등록한뒤, SessionManagement에 해당 빈을 등록시키고, 세션이 만료되었을경우 스프링 시큐리티가 이를 감지하도록 이벤트 리스너도
-빈으로 등록해둔다.  
-
+빈으로 등록해둔다.
 
 <pre>
 <code>@Configuration  
