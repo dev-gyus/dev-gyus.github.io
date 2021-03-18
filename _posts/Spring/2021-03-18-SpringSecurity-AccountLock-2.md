@@ -57,6 +57,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 이제 준비는 다 됐고, 유저를 정지시키는 클래스에 정지기능을 가진 메소드를 구현하면된다.  
 Spring Security, Spring Data JPA를 사용하였다
+
+
 <pre>
 <code>
 ```
@@ -89,7 +91,6 @@ public void blockUser(Long memberId){
 ```
 </code>
 </pre>
-
 
 
 이렇게 해두고, 정지관련된 리소스에는 관리자권한을 가진 유저만 접근할 수 있도록 설정한뒤, 정지 요청시 대응하는 컨트롤러에서
