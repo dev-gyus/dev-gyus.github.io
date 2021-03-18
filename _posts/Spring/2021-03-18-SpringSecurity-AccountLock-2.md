@@ -1,86 +1,90 @@
 ---
 layout: post
-title:  "[Spring-Security] 계정 정지 기능 구현 - 1"
-subtitle:   "특정 사용자 로그인시 로그인을 차단하는 기능 구현"
-date: 2021-03-16
+title:  "[Spring-Security] 계정 정지 기능 구현 - 2"
+subtitle:   "특정 사용자 계정 정지 및 실시간 계정 로그아웃 기능 구현"
+date: 2021-03-18
 categories: Spring
 tags: Spring-Security
 comments: true
 ---
 
-# 계정잠금기능 설정하기
+# 계정잠금기능 설정하기 - 2
 ---
->운영하는 서비스에서 운영원칙에 어긋나거나 정상적인 이용을 하지 않는 유저를 대상으로 서비스 이용권한을 제한해야할 필요성이 있다.
+>이번에는 계정 정지를 넘어 실시간으로 유저를 로그아웃 시키는 방법을 알아보자
 
-서비스를 이용하는 유저가 단기간에 너무 많은 요청을 비정상적으로 한다거나, 특정 값을 입력하도록 제한했는데, 자바스크립트로 해킹하여 비정상적인 값을 대입하여 접근한다거나 등등 공개적인 서비스에서는 정상적인 이용을 하는사람이 대부분이지만, 소수의 비정상적인 이용을 하는사람에 의해 서버가 뻗어버리거나 DB가 엉망이 되어버리는 경우가 있을수있다.
-
-
-계정 정지로는 사실 이를 원천적으로 막기는 어렵지만, 특이한 시도를 과도하게 하는것에 대한 방어수단으로서 특정 계정을 정지하여 더이상 사이트의 서비스를 이용할 수 없도록 하는건 어느 서비스에서나 흔히 볼 수 있는 제재정책이다.  
-
-물론 이 페이지에서 설명하는 기능이 많이 부족한건 사실이나, 개념 공부차원에서는 충분히 매리트가 있을듯싶다.
+1편에서 이어지는 내용이므로, 1편의 내용은 아래링크를 참조하세요.  
+[클릭하시면 1편으로 이동합니다.](https://dev-gyus.github.io/spring/2021/03/16/SpringSecurity-AccountLock-2.html)  
 ***
 
-구현에는 Spring-Secrity를 사용하였고, 1편의 기능 구현의 설명을 하자면  
->1. 계정 Entity에 계정이 정지되었는지 여부 판단을 위한 필드 생성
->2. 관리자가 정지시킬 계정의 1번에서 생성한 필드값 조정 및 DB저장
->3. 해당 유저 로그인시 계정 정지여부 확인 및 정지계정일경우 로그인정보가 일치해도 실패하도록 구현
+사용된 개념은 다음과 같다
+>1. SpringSecurity에서 사용자의 요청을 처리할때 세션에 인증정보가 있으면 해당 인증정보를 Security Context에 저장함
+>2. 인증정보가 저장되어있는 객체는 SessionRegistry이며, getAllPrincipals() 메소드로 현재 인증된 모든 사용자 세션을 가져올수있음.
+>3.반환된 객체를 로그인에 사용한 UserDetails 혹은 User 객체를 상속한 객체로 캐스팅 후 루프를 돌리며 특정 유저의 Unique필드와 캐스팅한 객체의 같은 필드를 대조한다.  
+>4. 대조하다 정지시킬 유저의 Unique필드와 같을때 SessionRegistry의 getAllSessions()로 해당 유저의 객체로 생성된 모든 세션을 가져옴.
+>5. 반환받은 객체는 SessionInfomation이란 객체의 컬렉션인데, 이 역시 루프를 돌려서 정지시킬 계정의 특정 unique값과 대조하여 해당하는 세션을 만료시켜 로그아웃 시키는 기능을 이용함.
 
-구현코드는 아래와 같다.
-- 멤버Entity
+우선, SessionRegistry를 우리가 주입받아 사용할 수 있도록 Security설정파일에 SessionRegistry 빈을 등록한뒤, SessionManagement에 해당 빈을 등록시키고, 세션이 만료되었을경우 스프링 시큐리티가 이를 감지하도록 이벤트 리스너도
+빈으로 등록해둔다.
+
 <pre>
-<code>@Getter
-public class Member{
+<code>@Configuration  
+@EnableWebSecurity
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
   ... 생략
-  private boolean locked;
-}
-</code>
-</pre>
-
-실제 로그인시 UserDetailsService의 loadUserByUsername메소드에서 UserDetails로 반환되어 Authentication객체에 저장될 로그인 전용 DTO클래스를 정의한다.
-
-<pre>
-<code>@Data
-public class MemberLogin{
-  private Member member;
-}
-</code>
-</pre>
-
-그리고, Spring-Security에서 로그인 성공시 후속작업을 진행하기 위해  
-AuthenticationSuccessHandler를 상속한 클래스를 정의한다.
-
-<pre>
-<code>@Component
-public class CustomSuccessHandler implements AuthenticationSuccessHandler{
-  private RequestCache requestCache = new HttpSessionRequestCache(); // 로그인페이지 이동 전 요청 저장되어있음
-  private RedirectStrategy redirectStrategy = new DefaultRedirectStrategy(); // 로그인 진행 후 리다이렉트전략
-
   @Override
-  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse, Authentication authentication){
-    MemberLogin memberLogin = (MemberLogin)authentication.getPrincipal();
-    // 만약 계정이 정지되었다면
-    if(memberLogin.getMember().isLocked()){
-      // 계정정지 예외 발생
-      throw new LockedException("계정이 정지되었습니다. 관리자에게 문의하세요.");
-    }
+  protected void configure(HttpSecurity http) throws Exception{
+    ... 생략
+    http.sessionManagement.sessionRegistry(sessionRegistry());
+  }
+  // SessionRegistry 빈등록 및 SessionManagement SessionManagementFilter에 등록
+  @Bean
+  public SessionRegistry sessionRegistry(){
+    return new SessionRegistryImpl();
+  }
 
-
-    SavedRequest savedRequest = requestCache.getRequest(request, redirect);
-    // 직접 로그인페이지로 접속한게 아니라면,
-    if(savedRequest != null){
-      // 이전 요청으로 리다이렉트
-      redirectStrategy.sendRedirect(request, response, savedRequest.getRequestUrl());
-    }else{
-      // 직접 로그인 페이지로 접근한거라면,
-      redirectStrategy.sendRedirect(request, response,
-        "/"); // 메인페이지로 리다이렉트
-    }
-
+  // 세션 만료시 SpringSecurity가 이를 감지하도록 이벤트 리스너 설정
+  @Bean
+  public static ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher(){
+    return new ServletListenerRegistrationBean<HttpSessionEventPublisher>(new HttpSessionEventPublisher());
   }
 }
 </code>
 </pre>
 
-이 기능을 이용하여 관리자가 런타임중 특정 유저의 locked 필드만 true로 변경하는 것으로 계정을 정지시키고, 정지해제 시킬수 있도록 구현했다.  
-실제로 쓰려면 좀 더 손을 봐야겠지만, 그래도 안해두는것보단 훨 나을듯싶다.  
-더 낫게 쓰는방법에 대해선 추후 알게되면 다시 정리해야겠다.
+이제 준비는 다 됐고, 유저를 정지시키는 클래스에 정지기능을 가진 메소드를 구현하면된다.  
+Spring Security, Spring Data JPA를 사용하였다
+<pre>
+<code>@Service
+@RequireArgsConstructor
+@Transactional
+public class BlockUserService{
+  private final MemberRepository memberRepository;
+  private final SessionRegistry sessionRegistry;
+
+public void blockUser(Long memberId){
+  Member findMember = memberRepository.findById(memberId).orElseThrow();
+  findMember.setLocked(true); // 유저 계정 잠그기
+  // 모든 세션에서 인증된 객체를 가져와서 UserDetails 혹은 User객체 상속한 로그인용 DTO객체로 변환
+  List<MemberLogin> principals = (MemberLogin) sessionRegistry.getAllPrincipals()
+                    .stream().map(o -> (MemberLogin) o).collect(Collectors.toList());
+
+  for(MemberLogin principal : principals){
+    Member member = principal.getMember();
+    // 인증된 객체들중 정지시키려는 객체의 유니크값과 루프돌던 인증객체의 유니크값이 같을경우
+    if(member.getId() == memberId){
+      List<SessionInformation> sessionList = sessionRegistry.getAllSessions(principal, false); // 해당 인증객체로 생성된 모든 세션을 가져옴
+      for(SessionInformation session : sessionList){
+        session.expireNow(); // 해당 인증객체의 현재 만료되지 않은 세션을 모두 만료시킴 -> HttpSessionEventPublisher가 세션 만료를 감지하고 로그아웃 처리시킴
+      }
+    }
+  }
+}
+}
+</code>
+</pre>  
+
+이렇게 해두고, 정지관련된 리소스에는 관리자권한을 가진 유저만 접근할 수 있도록 설정한뒤, 정지 요청시 대응하는 컨트롤러에서
+blockUser 메소드를 호출하도록 프로그래밍 해두면, 정지된 유저는 다음요청에 로그아웃 처리되어 인증을 필요로 하는 리소스에 접근할때 Security설정에 의해 Login Url로 이동하지만, 이미 정지처리가 되어있기 때문에 로그인해도 LockedException 발생으로 로그인이 되지않는다.  
+***
+이와같이 실시간으로 유저를 밴 할수있는 기능을 구현해봤는데, 이게 가장 최선의 예제라고는 생각하지 않지만, 적어도 서비스의 필수기능으로서의 역할은 잘 해주는것같다.  
+결론은 까먹지말자.
