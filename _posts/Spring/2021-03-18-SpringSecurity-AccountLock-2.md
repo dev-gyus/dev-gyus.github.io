@@ -1,12 +1,11 @@
 ---
 layout: post
-title: '[Spring-Security] 계정 정지 기능 구현 - 2'
-subtitle: 특정 사용자 계정 정지 및 실시간 계정 로그아웃 기능 구현
-date: {}
+title:  "[Spring-Security] 계정 정지 기능 구현 - 2"
+subtitle:   "특정 사용자 계정 정지 및 실시간 계정 로그아웃 기능 구현"
+date: 2021-03-18
 categories: Spring
 tags: Spring-Security
 comments: true
-published: true
 ---
 
 # 계정잠금기능 설정하기 - 2
@@ -25,6 +24,7 @@ published: true
 >5. 반환받은 객체는 SessionInfomation이란 객체의 컬렉션인데, 이 역시 루프를 돌려서 정지시킬 계정의 특정 unique값과 대조하여 해당하는 세션을 만료시켜 로그아웃 시키는 기능을 이용함.
 
 우선, SessionRegistry를 우리가 주입받아 사용할 수 있도록 Security설정파일에 SessionRegistry 빈을 등록한뒤, SessionManagement에 해당 빈을 등록시키고, 세션이 만료되었을경우 스프링 시큐리티가 이를 감지하도록 이벤트 리스너도
+빈으로 등록해둔다.  
 
 
 <pre>
@@ -58,6 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 이제 준비는 다 됐고, 유저를 정지시키는 클래스에 정지기능을 가진 메소드를 구현하면된다.  
 Spring Security, Spring Data JPA를 사용하였다
 
+
 <pre>
 <code>
 ```
@@ -90,8 +91,6 @@ public void blockUser(Long memberId){
 ```
 </code>
 </pre>
-
-
 
 
 이렇게 해두고, 정지관련된 리소스에는 관리자권한을 가진 유저만 접근할 수 있도록 설정한뒤, 정지 요청시 대응하는 컨트롤러에서
